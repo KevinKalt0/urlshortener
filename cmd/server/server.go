@@ -34,18 +34,28 @@ puis lance le serveur HTTP.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO : Charger la configuration chargée globalement via cmd.cfg
 		// Ne pas oublier la gestion d'erreur (si nil ?), si erreur, faire un log.Fataf
+		serverAddr := ":8080" // valeur hardcodée tant que cfg n’est pas utilisé
 
 		// TODO : Initialiser la connexion à la base de données SQLite avec GORM.
 		// Utilisez le nom de la base de données depuis la configuration (cfg.Database.Name).
+		db, err := gorm.Open(sqlite.Open("url_shortener.db"), &gorm.Config{})
+		if err != nil {
+		log.Fatalf("Erreur de connexion à la base de données : %v", err)
+		}
 
 		// TODO : Initialiser les repositories.
 		// Créez des instances de GormLinkRepository et GormClickRepository.
+
+		linkRepo := repository.NewLinkRepository(db)
+		clickRepo := repository.NewClickRepository(db)
 
 		// Laissez le log
 		log.Println("Repositories initialisés.")
 
 		// TODO : Initialiser les services métiers.
 		// Créez des instances de LinkService et ClickService, en leur passant les repositories nécessaires.
+		linkService := services.NewLinkService(linkRepo)
+		clickService := services.NewClickService(clickRepo)
 
 		// Laissez le log
 		log.Println("Services métiers initialisés.")
@@ -53,21 +63,32 @@ puis lance le serveur HTTP.`,
 		// TODO : Initialiser le channel ClickEventsChannel (api/handlers) des événements de clic et lancer les workers (StartClickWorkers).
 		// Le channel est bufferisé avec la taille configurée.
 		// Passez le channel et le clickRepo aux workers.
+		clickEvents := make(chan models.ClickEvent, 100) // buffer de 100
+
+		go workers.StartClickWorkers(1, clickEvents, clickRepo)
+
+
 
 		// TODO : Remplacer les XXX par les bonnes variables
 		log.Printf("Channel d'événements de clic initialisé avec un buffer de %d. %d worker(s) de clics démarré(s).",
-			XXX, XXX)
+100, 1)
 
 		// TODO : Initialiser et lancer le moniteur d'URLs.
 		// Utilisez l'intervalle configuré (cfg.Monitor.IntervalMinutes).
 		// Lancez le moniteur dans sa propre goroutine.
-		monitorInterval := time.Duration(XXX) * time.Minute
-		urlMonitor := monitor.NewUrlMonitor() // Le moniteur a besoin du linkRepo et de l'interval
+		monitorInterval := 5 * time.Minute // valeur par défaut en attendant Viper
+		urlMonitor := monitor.NewUrlMonitor(linkRepo, monitorInterval)
 		go urlMonitor.Start()
 		log.Printf("Moniteur d'URLs démarré avec un intervalle de %v.", monitorInterval)
 
 		// TODO : Configurer le routeur Gin et les handlers API.
 		// Passez les services nécessaires aux fonctions de configuration des routes.
+		handler := api.NewAPIHandler(linkService, clickService, clickEvents)
+		router := gin.Default()
+		router.GET("/health", handler.HealthCheckHandler)
+		router.POST("/api/v1/links", handler.CreateShortLinkHandler)
+		router.GET("/:shortCode", handler.RedirectHandler)
+		router.GET("/api/v1/links/:shortCode/stats", handler.GetLinkStatsHandler)
 
 		// Pas toucher au log
 		log.Println("Routes API configurées.")
@@ -81,6 +102,12 @@ puis lance le serveur HTTP.`,
 
 		// TODO : Démarrer le serveur Gin dans une goroutine anonyme pour ne pas bloquer.
 		// Pensez à logger des ptites informations...
+		go func() {
+			log.Printf("Serveur lancé sur http://localhost%s", serverAddr)
+			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("Erreur serveur : %v", err)
+			}
+			}()
 
 		// Gére l'arrêt propre du serveur (graceful shutdown).
 		// Créez un channel pour les signaux OS (SIGINT, SIGTERM).
@@ -101,4 +128,7 @@ puis lance le serveur HTTP.`,
 
 func init() {
 	// TODO : ajouter la commande
+	func init() {
+		cmd2.RootCmd.AddCommand(RunServerCmd)
+		}
 }
