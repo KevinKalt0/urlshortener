@@ -10,25 +10,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// cfg est la variable globale qui contiendra la configuration chargée.
+// Elle sera accessible à toutes les commandes Cobra.
+var Cfg *config.Config
 
+// TODO : Créer la RootCmd avec Cobra
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "urlshortener",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+// rootCmd représente la commande de base lorsque l'on appelle l'application sans sous-commande.
+// C'est le point d'entrée principal pour Cobra.
+var RootCmd = &cobra.Command{
+	Use:   "URLshortener",
+	Short: "Un service de raccourcissement d'URLs avec API REST et CLI",
+	Long: "'url-shortener' est une application complète pour gérer des URLs courtes." +
+		"\nElle inclut un serveur API pour le raccourcissement et la redirection,\n" +
+		"ainsi qu'une interface en ligne de commande pour l'administration.\n" +
+		"Utilisez 'url-shortener [command] --help' pour plus d'informations sur une commande.",
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// Execute est le point d'entrée principal pour l'application Cobra.
+// Il est appelé depuis 'main.go'.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
