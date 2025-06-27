@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 
-	"github.com/axellelanca/urlshortener/internal/models"
+	"github.com/KevinKalt0/urlshortener/internal/models"
 	"gorm.io/gorm"
 )
 

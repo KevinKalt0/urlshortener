@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/axellelanca/urlshortener/internal/config"
+	"github.com/KevinKalt0/urlshortener/internal/config"
 	"github.com/spf13/cobra"
 )
 

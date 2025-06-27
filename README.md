@@ -93,7 +93,7 @@ Suivez ces étapes pour mettre en place le projet et tester votre application (q
 
 1. **Clonez le dépôt :**
 ```bash
-git clone https://github.com/axellelanca/urlshortener.git
+git clone https://github.com/KevinKalt0/urlshortener.git
 cd urlshortener # Naviguez vers le dossier du projet cloné
 ```
 

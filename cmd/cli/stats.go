@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	cmd2 "github.com/axellelanca/urlshortener/cmd"
-	"github.com/axellelanca/urlshortener/internal/repository"
-	"github.com/axellelanca/urlshortener/internal/services"
+	cmd2 "github.com/KevinKalt0/urlshortener/cmd"
+	"github.com/KevinKalt0/urlshortener/internal/repository"
+	"github.com/KevinKalt0/urlshortener/internal/services"
 	"github.com/spf13/cobra"
 
 	"gorm.io/driver/sqlite" // Driver SQLite pour GORM
