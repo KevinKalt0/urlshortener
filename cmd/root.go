@@ -34,7 +34,7 @@ func Execute() {
 func init() {
 	// Charger la configuration au démarrage de l'application
 	var err error
-	Cfg, err = config.LoadConfig()
+	Cfg = config.GetConfig()
 	if err != nil {
 		// En cas d'erreur de chargement de config, on peut soit :
 		// 1. Arrêter l'application

@@ -23,12 +23,14 @@ const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 // IMPORTANT : Le champ doit être du type de l'interface (non-pointeur).
 type LinkService struct {
 	linkRepo repository.LinkRepository
+	clickRepo repository.ClickRepository
 }
 
 // NewLinkService crée et retourne une nouvelle instance de LinkService.
 func NewLinkService(linkRepo repository.LinkRepository) *LinkService {
 	return &LinkService{
 		linkRepo: linkRepo,
+		clickRepo: clickRepo,
 	}
 }
 
@@ -125,6 +127,20 @@ func (s *LinkService) GetLinkByShortCode(shortCode string) (*models.Link, error)
 		return nil, fmt.Errorf("failed to get link by short code: %w", err)
 	}
 	return link, nil
+}
+
+func (s *LinkService) GetStatsByShortCode(shortCode string) (*models.Link, int, error) {
+	link, err := s.linkRepo.GetLinkByShortCode(shortCode)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	clicks, err := s.clickRepo.CountClicksByLinkID(link.ID)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return link, clicks, nil
 }
 
 // GetLinkStats récupère les statistiques pour un lien donné (nombre total de clics).

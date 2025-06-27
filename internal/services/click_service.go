@@ -12,7 +12,12 @@ import (
 type ClickService struct {
     clickRepo repository.ClickRepository
 }
-
+type ClickEvent struct {
+	LinkID    uint
+	Timestamp time.Time
+	UserAgent string
+	IP        string
+}
 // NewClickService crée et retourne une nouvelle instance de ClickService.
 // C'est la fonction recommandée pour obtenir un service, assurant que toutes ses dépendances sont injectées.
 func NewClickService(clickRepo repository.ClickRepository) *ClickService {
