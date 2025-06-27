@@ -1,129 +1,100 @@
 package api
 
 import (
-	"errors"
-	"log"
-	"net/http"
-	"time"
+    "net/http"
+    "github.com/KevinKalt0/internal/models"
+    "github.com/KevinKalt0/internal/repository"
 
+<<<<<<< Updated upstream
 	"github.com/KevinKalt0/urlshortener/internal/models"
 	"github.com/KevinKalt0/urlshortener/internal/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm" // Pour gérer gorm.ErrRecordNotFound
+=======
+    "github.com/gin-gonic/gin"
+>>>>>>> Stashed changes
 )
 
-
-// TODO Créer une variable ClickEventsChannel qui est un chan de type ClickEvent
-// ClickEventsChannel est le channel global (ou injecté) utilisé pour envoyer les événements de clic
-// aux workers asynchrones. Il est bufferisé pour ne pas bloquer les requêtes de redirection.
-
-
-// SetupRoutes configure toutes les routes de l'API Gin et injecte les dépendances nécessaires
-func SetupRoutes(router *gin.Engine, linkService *services.LinkService) {
-	// Le channel est initialisé ici.
-	if ClickEventsChannel == nil {
-		// TODO Créer le channel ici (make), il doit être bufférisé
-		// La taille du buffer doit être configurable via Viper (cfg.Analytics.BufferSize)
-		ClickEventsChannel =
-	}
-
-	// TODO : Route de Health Check , /health
-	router.GET()
-
-	// TODO : Routes de l'API
-	// Doivent être au format /api/v1/
-	// POST /links
-	// GET /links/:shortCode/stats
-
-
-
-	// Route de Redirection (au niveau racine pour les short codes)
-	router.GET("/:shortCode", RedirectHandler(linkService))
+type APIHandler struct {
+    LinkRepo  repository.LinkRepository
+    ClickRepo repository.ClickRepository
 }
 
-// HealthCheckHandler gère la route /health pour vérifier l'état du service.
-func HealthCheckHandler(c *gin.Context) {
-	// TODO  Retourner simplement du JSON avec un StatusOK, {"status": "ok"}
+// Constructeur de handler
+func NewAPIHandler(linkRepo repository.LinkRepository, clickRepo repository.ClickRepository) *APIHandler {
+    return &APIHandler{
+        LinkRepo:  linkRepo,
+        ClickRepo: clickRepo,
+    }
 }
 
-// CreateLinkRequest représente le corps de la requête JSON pour la création d'un lien.
-type CreateLinkRequest struct {
-	LongURL string `json:"long_url" binding:"required,url"` // 'binding:required' pour validation, 'url' pour format URL
+// GET /health
+func (h *APIHandler) HealthCheckHandler(c *gin.Context) {
+    c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
-// CreateShortLinkHandler gère la création d'une URL courte.
-func CreateShortLinkHandler(linkService *services.LinkService) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var req CreateLinkRequest
-		// TODO : Tente de lier le JSON de la requête à la structure CreateLinkRequest.
-		// Gin gère la validation 'binding'.
+// POST /api/v1/links
+func (h *APIHandler) CreateShortLinkHandler(c *gin.Context) {
+    var req struct {
+        LongURL string `json:"long_url" binding:"required"`
+    }
 
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+        return
+    }
 
-		// TODO: Appeler le LinkService (CreateLink pour créer le nouveau lien.
+    // Générer un shortcode de 6 caractères (logique à placer dans link_service.go)
+    shortCode := generateShortCode() // Placeholder - à remplacer par appel réel au service
+    link := &models.Link{
+        ShortCode: shortCode,
+        LongURL:   req.LongURL,
+    }
 
+    if err := h.LinkRepo.Create(link); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not save link"})
+        return
+    }
 
-		// Retourne le code court et l'URL longue dans la réponse JSON.
-		// TODO Choisir le bon code HTTP
-		c.JSON(XXX, gin.H{
-			"short_code":     link.ShortCode,
-			"long_url":       link.LongURL,
-			"full_short_url": "http://localhost:8080/" + link.ShortCode, // TODO: Utiliser cfg.Server.BaseURL ici
-		})
-	}
+    c.JSON(http.StatusCreated, gin.H{
+        "code":      link.ShortCode,
+        "short_url": "http://localhost:8080/" + link.ShortCode,
+    })
 }
 
-// RedirectHandler gère la redirection d'une URL courte vers l'URL longue et l'enregistrement asynchrone des clics.
-func RedirectHandler(linkService *services.LinkService) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Récupère le shortCode de l'URL avec c.Param
-		shortCode :=
+// GET /:shortCode
+func (h *APIHandler) RedirectHandler(c *gin.Context) {
+    code := c.Param("shortCode")
+    link, err := h.LinkRepo.FindByCode(code)
+    if err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
+        return
+    }
 
-		// TODO 2: Récupérer l'URL longue associée au shortCode depuis le linkService (GetLinkByShortCode)
+    // Ici on enverra un événement au worker pour enregistrer le clic (non bloquant)
+    // Exemple : clickChannel <- ClickEvent{LinkID: link.ID, IP: c.ClientIP(), UA: ...}
 
-		if err != nil {
-			// Si le lien n'est pas trouvé, retourner HTTP 404 Not Found.
-			// Utiliser errors.Is et l'erreur Gorm
-			if  { // Utilisez errors.Is(err, gorm.ErrRecordNotFound) en production si l'erreur est wrappée
-
-				return
-			}
-			// Gérer d'autres erreurs potentielles de la base de données ou du service
-			log.Printf("Error retrieving link for %s: %v", shortCode, err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
-			return
-		}
-
-		// TODO 3: Créer un ClickEvent avec les informations pertinentes.
-		clickEvent :=
-
-		// TODO 4: Envoyer le ClickEvent dans le ClickEventsChannel avec le Multiplexage.
-		// Utilise un `select` avec un `default` pour éviter de bloquer si le channel est plein.
-		// Pour le default, juste un message à afficher :
-		// log.Printf("Warning: ClickEventsChannel is full, dropping click event for %s.", shortCode)
-
-
-
-		// TODO 5: Effectuer la redirection HTTP 302 (StatusFound) vers l'URL longue.
-
-	}
+    c.Redirect(http.StatusFound, link.LongURL)
 }
 
-// GetLinkStatsHandler gère la récupération des statistiques pour un lien spécifique.
-func GetLinkStatsHandler(linkService *services.LinkService) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		 // TODO Récupère le shortCode de l'URL avec c.Param
+// GET /api/v1/links/:shortCode/stats
+func (h *APIHandler) GetLinkStatsHandler(c *gin.Context) {
+    code := c.Param("shortCode")
+    link, err := h.LinkRepo.FindByCode(code)
+    if err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "Link not found"})
+        return
+    }
 
-		// TODO 6: Appeler le LinkService pour obtenir le lien et le nombre total de clics.
-			// Gérer le cas où le lien n'est pas trouvé.
-		// toujours avec l'erreur Gorm ErrRecordNotFound
-			// Gérer d'autres erreurs
-		}
+    count, err := h.ClickRepo.CountByLinkID(link.ID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve stats"})
+        return
+    }
 
-		// Retourne les statistiques dans la réponse JSON.
-		c.JSON(http.StatusOK, gin.H{
-			"short_code":   link.ShortCode,
-			"long_url":     link.LongURL,
-			"total_clicks": totalClicks,
-		})
-	}
+    c.JSON(http.StatusOK, gin.H{
+        "short_code": link.ShortCode,
+        "long_url":   link.LongURL,
+        "clicks":     count,
+    })
 }
