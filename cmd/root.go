@@ -14,17 +14,17 @@ import (
 var Cfg *config.Config
 
 // TODO : Créer la RootCmd avec Cobra
-// Utiliser ces descriptions :
-// "Un service de raccourcissement d'URLs avec API REST et CLI"
-// `
-//'url-shortener' est une application complète pour gérer des URLs courtes.
-//Elle inclut un serveur API pour le raccourcissement et la redirection,
-//ainsi qu'une interface en ligne de commande pour l'administration.
-//
-//Utilisez 'url-shortener [command] --help' pour plus d'informations sur une commande.`
 
 // rootCmd représente la commande de base lorsque l'on appelle l'application sans sous-commande.
 // C'est le point d'entrée principal pour Cobra.
+var RootCmd = &cobra.Command{
+	Use:   "URLshortener",
+	Short: "Un service de raccourcissement d'URLs avec API REST et CLI",
+	Long: "'url-shortener' est une application complète pour gérer des URLs courtes." +
+		"\nElle inclut un serveur API pour le raccourcissement et la redirection,\n" +
+		"ainsi qu'une interface en ligne de commande pour l'administration.\n" +
+		"Utilisez 'url-shortener [command] --help' pour plus d'informations sur une commande.",
+}
 
 // Execute est le point d'entrée principal pour l'application Cobra.
 // Il est appelé depuis 'main.go'.
