@@ -22,6 +22,10 @@ basées sur les modèles Go.`,
 		// TODO : Charger la configuration chargée globalement via cmd.cfg
 
 		// TODO 2: Initialiser la connexion à la base de données SQLite avec GORM.
+		db, err := gorm.Open(sqlite.Open("url_shortener.db"), &gorm.Config{})
+		if err != nil {
+		log.Fatalf("FATAL: impossible de se connecter à la base de données : %v", err)
+		}
 
 		sqlDB, err := db.DB()
 		if err != nil {
@@ -30,6 +34,11 @@ basées sur les modèles Go.`,
 		// TODO Assurez-vous que la connexion est fermée après la migration.
 
 		// TODO 3: Exécuter les migrations automatiques de GORM.
+
+		err = db.AutoMigrate(&models.Link{}, &models.Click{})
+		if err != nil {
+		log.Fatalf("FATAL: Erreur pendant les migrations : %v", err)
+		}
 		// Utilisez db.AutoMigrate() et passez-lui les pointeurs vers tous vos modèles.
 
 		// Pas touche au log
@@ -39,4 +48,5 @@ basées sur les modèles Go.`,
 
 func init() {
 	// TODO : Ajouter la commande à RootCmd
+	cmd2.RootCmd.AddCommand(MigrateCmd)
 }
