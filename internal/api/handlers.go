@@ -13,7 +13,7 @@ import (
 )
 
 // TODO Créer une variable ClickEventsChannel qui est un chan de type ClickEvent
-var ClickEventsChannel chan services.ClickEvent
+var ClickEventsChannel chan services.ClickService
 
 // SetupRoutes configure toutes les routes de l'API Gin et injecte les dépendances nécessaires
 func SetupRoutes(router *gin.Engine, linkService *services.LinkService) {
@@ -22,7 +22,7 @@ func SetupRoutes(router *gin.Engine, linkService *services.LinkService) {
 		// TODO Créer le channel ici (make), il doit être bufférisé
 		// La taille du buffer doit être configurable via Viper (cfg.Analytics.BufferSize)
 		cfg := config.GetConfig()
-		ClickEventsChannel = make(chan services.ClickEvent, cfg.Analytics.BufferSize)
+		ClickEventsChannel = make(chan services.ClickService, cfg.Analytics.BufferSize)
 	}
 
 	// TODO : Route de Health Check , /health
@@ -101,7 +101,7 @@ func RedirectHandler(linkService *services.LinkService) gin.HandlerFunc {
 		}
 
 		// TODO 3: Créer un ClickEvent avec les informations pertinentes.
-		clickEvent := services.ClickEvent{
+		clickEvent := services.ClickService{
 			LinkID:    link.ID,
 			Timestamp: time.Now(),
 			UserAgent: c.Request.UserAgent(),
