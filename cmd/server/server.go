@@ -91,7 +91,7 @@ puis lance le serveur HTTP.`,
 		// router.GET("/api/v1/links/:shortCode/stats", handler.GetLinkStatsHandler)
 		router := gin.Default()
 
-		clickEvents = make(chan services.ClickEvent, 100)
+		clickEvents = make(chan models.ClickEvent, 100)
 
 		api.SetupRoutes(router, linkService)
 
