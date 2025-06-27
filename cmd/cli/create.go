@@ -16,6 +16,7 @@ import (
 
 // TODO : Faire une variable longURLFlag qui stockera la valeur du flag --url
 var longURLFlag string
+
 // CreateCmd représente la commande 'create'
 var CreateCmd = &cobra.Command{
 	Use:   "create",
@@ -34,6 +35,7 @@ Exemple:
 		// si erreur, os.Exit(1)
 
 		// TODO : Charger la configuration chargée globalement via cmd.cfg
+		cfg := cmd2.Cfg
 		
 		// TODO : Initialiser la connexion à la base de données SQLite.
 
@@ -49,7 +51,7 @@ Exemple:
 		defer sqlDB.Close()
 
 		// TODO S'assurer que la connexion est fermée à la fin de l'exécution de la commande
-		
+
 		// TODO : Initialiser les repositories et services nécessaires NewLinkRepository & NewLinkService
 		linkRepo := repository.NewLinkRepository(db)
 		linkService := services.NewLinkService(linkRepo)

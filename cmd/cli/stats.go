@@ -35,7 +35,6 @@ Exemple:
 		}
 		// TODO : Charger la configuration chargée globalement via cmd.cfg
 
-
 		// TODO 3: Initialiser la connexion à la base de données SQLite avec GORM.
 		// log.Fatalf si erreur
 		db, err := gorm.Open(sqlite.Open("url_shortener.db"), &gorm.Config{})
@@ -48,39 +47,26 @@ Exemple:
 			log.Fatalf("FATAL: Échec de l'obtention de la base SQL : %v", err)
 		}
 
-
-		defer sqlDB.Close()
-
-
 		// TODO S'assurer que la connexion est fermée à la fin de l'exécution de la commande
 		defer sqlDB.Close()
 
 		// TODO : Initialiser les repositories et services nécessaires NewLinkRepository & NewLinkService
 		linkRepo := repository.NewLinkRepository(db)
-		clickRepo := repository.NewClickRepository(db)
 		linkService := services.NewLinkService(linkRepo)
-		clickService := services.NewClickService(clickRepo)
-
 
 		// TODO 5: Appeler GetLinkStats pour récupérer le lien et ses statistiques.
 		// Attention, la fonction retourne 3 valeurs
 		// Pour l'erreur, utilisez gorm.ErrRecordNotFound
 		// Si erreur, os.Exit(1)
-		link, totalClicks, err := linkService.GetLinkStats(shortCodeFlag, clickService)
+		link, totalClicks, err := linkService.GetLinkStats(shortCodeFlag)
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
-				fmt.Println(" Aucun lien trouvé pour ce code.")
+				fmt.Println("Aucun lien trouvé pour ce code.")
 			} else {
-				fmt.Printf(" Erreur lors de la récupération des stats : %v\n", err)
+				fmt.Printf("Erreur lors de la récupération des stats : %v\n", err)
 			}
 			os.Exit(1)
 		}
-
-		fmt.Printf(" Statistiques pour le code court: %s\n", link.ShortCode)
-		fmt.Printf("URL longue: %s\n", link.LongURL)
-		fmt.Printf("Total de clics: %d\n", totalClicks)
-
-
 
 		fmt.Printf("Statistiques pour le code court: %s\n", link.ShortCode)
 		fmt.Printf("URL longue: %s\n", link.LongURL)
@@ -97,7 +83,5 @@ func init() {
 	cmd2.RootCmd.AddCommand(StatsCmd)
 	// TODO Marquer le flag comme requis
 
-
 	// TODO : Ajouter la commande à RootCmd
-
 }

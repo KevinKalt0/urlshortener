@@ -24,7 +24,7 @@ basées sur les modèles Go.`,
 		// TODO 2: Initialiser la connexion à la base de données SQLite avec GORM.
 		db, err := gorm.Open(sqlite.Open("url_shortener.db"), &gorm.Config{})
 		if err != nil {
-		log.Fatalf("FATAL: impossible de se connecter à la base de données : %v", err)
+			log.Fatalf("FATAL: impossible de se connecter à la base de données : %v", err)
 		}
 
 		sqlDB, err := db.DB()
@@ -32,12 +32,13 @@ basées sur les modèles Go.`,
 			log.Fatalf("FATAL: Échec de l'obtention de la base de données SQL sous-jacente: %v", err)
 		}
 		// TODO Assurez-vous que la connexion est fermée après la migration.
+		defer sqlDB.Close()
 
 		// TODO 3: Exécuter les migrations automatiques de GORM.
 
 		err = db.AutoMigrate(&models.Link{}, &models.Click{})
 		if err != nil {
-		log.Fatalf("FATAL: Erreur pendant les migrations : %v", err)
+			log.Fatalf("FATAL: Erreur pendant les migrations : %v", err)
 		}
 		// Utilisez db.AutoMigrate() et passez-lui les pointeurs vers tous vos modèles.
 
