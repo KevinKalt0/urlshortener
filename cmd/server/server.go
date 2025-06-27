@@ -54,8 +54,8 @@ puis lance le serveur HTTP.`,
 
 		// TODO : Initialiser les services métiers.
 		// Créez des instances de LinkService et ClickService, en leur passant les repositories nécessaires.
-		linkService := services.NewLinkService(linkRepo)
-		clickService := services.NewClickService(clickRepo)
+		linkService := services.NewLinkService(linkRepo, clickRepo)
+		// clickService := services.NewClickService(clickRepo)
 
 		// Laissez le log
 		log.Println("Services métiers initialisés.")
@@ -83,18 +83,26 @@ puis lance le serveur HTTP.`,
 
 		// TODO : Configurer le routeur Gin et les handlers API.
 		// Passez les services nécessaires aux fonctions de configuration des routes.
-		handler := api.NewAPIHandler(linkService, clickService, clickEvents)
+		// handler := api.SetupRoutes(linkService)
+		// router := gin.Default()
+		// router.GET("/health", handler.HealthCheckHandler)
+		// router.POST("/api/v1/links", handler.CreateShortLinkHandler)
+		// router.GET("/:shortCode", handler.RedirectHandler)
+		// router.GET("/api/v1/links/:shortCode/stats", handler.GetLinkStatsHandler)
 		router := gin.Default()
-		router.GET("/health", handler.HealthCheckHandler)
-		router.POST("/api/v1/links", handler.CreateShortLinkHandler)
-		router.GET("/:shortCode", handler.RedirectHandler)
-		router.GET("/api/v1/links/:shortCode/stats", handler.GetLinkStatsHandler)
+
+		clickEvents = make(chan services.ClickEvent, 100)
+
+		api.SetupRoutes(router, linkService)
+
 
 		// Pas toucher au log
 		log.Println("Routes API configurées.")
+		
+		cfg := cmd2.Cfg
 
 		// Créer le serveur HTTP Gin
-		serverAddr := fmt.Sprintf(":%d", cfg.Server.Port)
+		serverAddr = fmt.Sprintf(":%d", cfg.Server.Port)
 		srv := &http.Server{
 			Addr:    serverAddr,
 			Handler: router,
@@ -127,8 +135,6 @@ puis lance le serveur HTTP.`,
 }
 
 func init() {
-	// TODO : ajouter la commande
-	func init() {
-		cmd2.RootCmd.AddCommand(RunServerCmd)
-		}
+	cmd2.RootCmd.AddCommand(RunServerCmd)
 }
+

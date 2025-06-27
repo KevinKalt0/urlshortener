@@ -27,9 +27,9 @@ type LinkService struct {
 }
 
 // NewLinkService crée et retourne une nouvelle instance de LinkService.
-func NewLinkService(linkRepo repository.LinkRepository) *LinkService {
+func NewLinkService(linkRepo repository.LinkRepository, clickRepo repository.ClickRepository) *LinkService {
 	return &LinkService{
-		linkRepo: linkRepo,
+		linkRepo:  linkRepo,
 		clickRepo: clickRepo,
 	}
 }
