@@ -6,9 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/KevinKalt0/urlshortener/internal/models"
-	"github.com/KevinKalt0/urlshortener/internal/services"
 	"github.com/KevinKalt0/urlshortener/internal/config"
+	"github.com/KevinKalt0/urlshortener/internal/services"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
